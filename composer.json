@@ -1,0 +1,23 @@
+{
+    "name": "tpmanc/yii2-file-behavior",
+    "keywords": ["yii", "file", "upload", "fileUpload", "behavior"],
+    "description": "Yii2 file uploading",
+    "homepage": "https://github.com/tpmanc/yii2-file-behavior",
+    "license": "BSD-3-Clause",
+    "minimum-stability" : "stable",
+    "authors": [
+        {
+            "name": "tpmanc",
+            "email": "tpxtrime@mail.ru",
+            "homepage": "https://github.com/tpmanc",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"tpmanc\\file-behavior\\": ""}
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "yiisoft/yii2-imagine": "*"
+    }
+}
