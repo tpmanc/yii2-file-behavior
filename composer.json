@@ -4,7 +4,7 @@
     "description": "Yii2 file uploading",
     "homepage": "https://github.com/tpmanc/yii2-file-behavior",
     "license": "BSD-3-Clause",
-    "minimum-stability" : "stable",
+    "minimum-stability" : "dev",
     "authors": [
         {
             "name": "tpmanc",
