@@ -14,7 +14,7 @@
         }
     ],
     "autoload": {
-        "psr-4": {"tpmanc\\file-behavior\\": ""}
+        "psr-4": {"tpmanc\\filebehavior\\": ""}
     },
     "require": {
         "php": ">=5.4.0",
