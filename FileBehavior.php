@@ -2,7 +2,7 @@
 /*
 *   Поведение для добавления изображения к модели
 */
-namespace backend\components;
+namespace tpmanc\fileBehavior;
 
 use yii\base\Behavior;
 use yii\web\UploadedFile;
