@@ -18,6 +18,6 @@
     },
     "require": {
         "php": ">=5.4.0",
-        "yiisoft/yii2-imagine": "*"
+        "tpmanc/yii2-imagick": "*"
     }
 }
