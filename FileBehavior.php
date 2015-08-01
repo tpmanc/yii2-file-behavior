@@ -7,7 +7,7 @@ namespace tpmanc\filebehavior;
 use Yii;
 use yii\base\Behavior;
 use yii\base\Event;
-use yii\imagine\Image;
+use tpmanc\imagick\Imagick;
 use yii\db\BaseActiveRecord;
 use yii\web\UploadedFile;
 
@@ -108,21 +108,30 @@ class FileBehavior extends Behavior
                 }
             }
             if (!$error) {
+                $successDownloaded = [];
                 // save files
                 if ($this->imageSizes !== false && is_array($this->imageSizes)) {
+                    $sizeCount = count($this->imageSizes);
+                    $sizeNumber = 0;
                     foreach ($this->imageSizes as $sizeName => $size) {
+                        $sizeNumber++;
+                        $deleteTempFile = false;
+                        if ($sizeNumber == $sizeCount) {
+                            $deleteTempFile = true;
+                        }
                         if (isset($size['folder']) && $size['folder'] !== '') {
                             $filePath = $this->getFolderPath() . $size['folder'] . '/' . $fileName;
                         } else {
                             $filePath = $this->getFolderPath() . '/' . $fileName;
                         }
-                        if (!$file->saveAs($filePath)) {
+                        if (!$file->saveAs($filePath, $deleteTempFile)) {
                             $error = true;
                             break;
                         } else {
+                            $successDownloaded[] = $filePath;
                             if (isset($size['width']) && isset($size['height'])) {
-                                Image::thumbnail($filePath, $size['width'], $size['height'])
-                                    ->save($filePath, ['quality' => 100]);
+                                Imagick::open($filePath)->resize($size['width'], $size['height'])
+                                    ->saveTo($filePath);
                             }
                         }
                     }
@@ -135,6 +144,9 @@ class FileBehavior extends Behavior
             }
         }
         if ($error) {
+            foreach ($successDownloaded as $path) {
+                unlink($path);
+            }
             $transaction->rollBack();
         } else {
             $transaction->commit();
