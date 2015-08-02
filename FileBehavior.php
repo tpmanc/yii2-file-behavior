@@ -49,8 +49,6 @@ class FileBehavior extends Behavior
     {
         return [
             BaseActiveRecord::EVENT_BEFORE_VALIDATE => 'beforeValidate',
-            BaseActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
-            BaseActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
             BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
             BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
             BaseActiveRecord::EVENT_BEFORE_DELETE => 'beforeDelete',
@@ -62,14 +60,6 @@ class FileBehavior extends Behavior
     //     return [
     //         'origin' => $this->getFolderPath() . $this->owner->imageId . '.' . $this->owner->imageExtension,
     //         'thumb' => $this->getFolderPath() . $this->owner->imageId . '_thumb.' . $this->owner->imageExtension,
-    //     ];
-    // }
-
-    // public function getImageUrl()
-    // {
-    //     return [
-    //         'origin' => $this->getFolderUrl() . $this->owner->imageId . '.' . $this->owner->imageExtension,
-    //         'thumb' => $this->getFolderUrl() . $this->owner->imageId . '_thumb.' . $this->owner->imageExtension,
     //     ];
     // }
 
@@ -90,7 +80,7 @@ class FileBehavior extends Behavior
     {
         $file = $this->owner->{$this->fileVar};
         $error = false;
-        if ($file !== null) {
+        if ($file !== null && $file !== '') {
             $fileModelClass = $this->fileModel;
             $transaction = $fileModelClass::getDb()->beginTransaction();
 
@@ -143,14 +133,15 @@ class FileBehavior extends Behavior
                     $error = true;
                 }
             }
-        }
-        if ($error) {
-            foreach ($successDownloaded as $path) {
-                unlink($path);
+
+            if ($error) {
+                foreach ($successDownloaded as $path) {
+                    unlink($path);
+                }
+                $transaction->rollBack();
+            } else {
+                $transaction->commit();
             }
-            $transaction->rollBack();
-        } else {
-            $transaction->commit();
         }
     }
 
