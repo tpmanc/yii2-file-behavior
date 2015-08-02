@@ -1,7 +1,7 @@
 <?php
-/*
-*   Поведение для добавления изображения к модели
-*/
+/**
+ * @author Chukancev Nikita <tpxtrime@mail.ru>
+ */
 namespace tpmanc\filebehavior;
 
 use Yii;
@@ -11,6 +11,9 @@ use tpmanc\imagick\Imagick;
 use yii\db\BaseActiveRecord;
 use yii\web\UploadedFile;
 
+/**
+ * File behavior
+ */
 class FileBehavior extends Behavior
 {
     public $fileModel;
@@ -39,6 +42,9 @@ class FileBehavior extends Behavior
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function events()
     {
         return [
@@ -67,11 +73,19 @@ class FileBehavior extends Behavior
     //     ];
     // }
 
+    /**
+     * Return full path to uplaod folder
+     * @return string Path to upload folder
+     */
     private function getFolderPath()
     {
         return Yii::getAlias($this->fileFolder) . '/';
     }
 
+    // TODO: create exceptions
+    /**
+     * Save file to disk
+     */
     private function saveFile($eventName)
     {
         $file = $this->owner->{$this->fileVar};
@@ -182,20 +196,11 @@ class FileBehavior extends Behavior
         }
     }
 
-
-    /* events */
-    public function beforeSave($event)
-    {
-        // $this->saveFile($event->name);
-    }
-
+    /**
+     * This method is called after models save.
+     */
     public function afterSave()
     {
         $this->saveFile($event);
     }
-
-    // public function beforeDelete($event)
-    // {
-    //     $this->deleteFile();
-    // }
 }
