@@ -14,10 +14,9 @@ use yii\web\UploadedFile;
 class FileBehavior extends Behavior
 {
     public $fileModel;
-    public $fileLinkModel;
     public $linkItemColumn = 'itemId';
     public $linkFileColumn = 'fileId';
-    public $fileFolder = '';
+    public $fileFolder;
     public $fileVar;
     public $imageSizes = false;
 
@@ -26,19 +25,19 @@ class FileBehavior extends Behavior
     /**
      * @inheritdoc
      */
-    // public function init()
-    // {
-    //     parent::init();
-    //     if ($this->attribute === null) {
-    //         throw new InvalidConfigException('The "attribute" property must be set.');
-    //     }
-    //     if ($this->path === null) {
-    //         throw new InvalidConfigException('The "path" property must be set.');
-    //     }
-    //     if ($this->url === null) {
-    //         throw new InvalidConfigException('The "url" property must be set.');
-    //     }
-    // }
+    public function init()
+    {
+        parent::init();
+        if ($this->fileModel === null) {
+            throw new InvalidConfigException('The "fileModel" property must be set.');
+        }
+        if ($this->fileFolder === null) {
+            throw new InvalidConfigException('The "fileFolder" property must be set.');
+        }
+        if ($this->fileVar === null) {
+            throw new InvalidConfigException('The "fileVar" property must be set.');
+        }
+    }
 
     public function events()
     {
