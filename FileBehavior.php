@@ -74,11 +74,6 @@ class FileBehavior extends Behavior
         return Yii::getAlias($this->fileFolder) . '/';
     }
 
-    // private function getFolderUrl()
-    // {
-    //     return \Yii::getAlias('@web/upload/') . $this->owner->imageFolder . '/';
-    // }
-
     private function saveFile($eventName)
     {
         $file = $this->owner->{$this->fileVar};
@@ -86,60 +81,54 @@ class FileBehavior extends Behavior
         if ($file !== null) {
             $fileModelClass = $this->fileModel;
             $transaction = $fileModelClass::getDb()->beginTransaction();
-            // save file model
-            $fileModel = new $fileModelClass;
-            $fileModel->image = 'temp';
-            if ($fileModel->save()) {
-                $fileName = $fileModel->id . '.' . $file->extension;
-                $fileModel->image = $fileName;
-                if (!$fileModel->save()) {
-                    $error = true;
-                }
-            } else {
-                $error = true;
-            }
-            if (!$error) {
-                // save file link model
-                $linkModel = new $this->fileLinkModel;
-                $linkModel->{$this->linkFileColumn} = $fileModel->id;
-                $linkModel->{$this->linkItemColumn} = $this->owner->id;
-                if (!$linkModel->save()) {
-                    $error = true;
-                }
-            }
-            if (!$error) {
-                $successDownloaded = [];
-                // save files
-                if ($this->imageSizes !== false && is_array($this->imageSizes)) {
-                    $sizeCount = count($this->imageSizes);
-                    $sizeNumber = 0;
-                    foreach ($this->imageSizes as $sizeName => $size) {
-                        $sizeNumber++;
-                        $deleteTempFile = false;
-                        if ($sizeNumber == $sizeCount) {
-                            $deleteTempFile = true;
-                        }
+
+            $successDownloaded = [];
+            // save files
+            if ($this->imageSizes !== false && is_array($this->imageSizes)) {
+                $sizeCount = count($this->imageSizes);
+                $sizeNumber = 0;
+                foreach ($this->imageSizes as $sizeName => $size) {
+                    $sizeNumber++;
+                    $deleteTempFile = false;
+                    if ($sizeNumber == $sizeCount) {
+                        $deleteTempFile = true;
+                    }
+                    if (isset($size['folder']) && $size['folder'] !== '') {
+                        $path = $this->fileFolder . '/' . $size['folder'] . '/';
+                    } else {
+                        $path = $this->fileFolder . '/';
+                    }
+                    // save to DB
+                    $fileName = $this->saveToDb($file, $path, $sizeName);
+                    if ($fileName !== false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
                             $filePath = $this->getFolderPath() . $size['folder'] . '/' . $fileName;
                         } else {
                             $filePath = $this->getFolderPath() . '/' . $fileName;
                         }
-                        if (!$file->saveAs($filePath, $deleteTempFile)) {
-                            $error = true;
-                            break;
-                        } else {
+                        if ($file->saveAs($filePath, $deleteTempFile)) {
                             $successDownloaded[] = $filePath;
                             if (isset($size['width']) && isset($size['height'])) {
-                                Imagick::open($filePath)->resize($size['width'], $size['height'])
-                                    ->saveTo($filePath);
+                                Imagick::open($filePath)->resize($size['width'], $size['height'])->saveTo($filePath);
                             }
+                        } else {
+                            $error = true;
+                            break;
                         }
+                    } else {
+                        $error = true;
                     }
-                } else {
+                }
+            } else {
+                $path = $this->fileFolder . '/';
+                $fileName = $this->saveToDb($file, $path);
+                if ($fileName !== false) {
                     $filePath = $this->getFolderPath() . $fileName;
                     if (!$file->saveAs($filePath)) {
                         $error = true;
                     }
+                } else {
+                    $error = true;
                 }
             }
         }
@@ -153,17 +142,34 @@ class FileBehavior extends Behavior
         }
     }
 
-    // private function deleteFile()
-    // {
-    //     $id = $this->owner->imageId;
-    //     $image = Images::findOne($id);
-    //     if ($image !== null) {
-    //         if ($image->delete()) {
-    //             unlink( $this->getImagePath()['origin'] );
-    //             unlink( $this->getImagePath()['thumb'] );
-    //         }
-    //     }
-    // }
+    /**
+     * Save file model
+     * @param object $file Active Record object
+     * @param string $path Image path
+     * @param string $size Size label
+     * @return string|booleab File name or false if error
+     */
+    private function saveToDb($file, $path, $size = 'default')
+    {
+        $fileModelClass = $this->fileModel;
+        $fileModel = new $fileModelClass;
+        $fileModel->itemId = $this->owner->id;
+        $fileModel->image = 'temp';
+        $fileModel->path = $path;
+        $fileModel->size = $size;
+
+        if ($fileModel->save()) {
+            $fileName = $fileModel->id . '.' . $file->extension;
+            $fileModel->image = $fileName;
+            if ($fileModel->save()) {
+                return $fileName;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
     /**
      * Invoked before validation starts.
