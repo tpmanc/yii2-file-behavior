@@ -19,7 +19,6 @@ class FileBehavior extends Behavior
     public $linkFileColumn = 'fileId';
     public $fileFolder = '';
     public $fileVar;
-    public $fileType;
     public $imageSizes = false;
 
     private $file;
