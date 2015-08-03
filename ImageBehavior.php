@@ -74,10 +74,18 @@ class ImageBehavior extends Behavior
                 WHERE
                     itemId = :itemid AND
                     size = :size";
+        if ($count !== false) {
+            $sql .= " LIMIT $count";
+        }
         $images = $imageModelClass::findBySql($sql, [
             ':itemid' => $this->owner->id,
             ':size' => $size,
-        ])->asArray()->all();
+        ])->asArray();
+        if ($count === 1) {
+            $images = $images->one();
+        } else {
+            $images = $images->all();
+        }
         return $images;
     }
 
