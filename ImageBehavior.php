@@ -12,16 +12,15 @@ use yii\db\BaseActiveRecord;
 use yii\web\UploadedFile;
 
 /**
- * File behavior
+ * Image behavior
  */
-class FileBehavior extends Behavior
+class ImageBehavior extends Behavior
 {
-    public $fileModel;
+    public $imageModel;
     public $imageSizeModel;
     public $linkItemColumn = 'itemId';
-    public $linkFileColumn = 'imageId';
-    public $fileFolder;
-    public $fileVar;
+    public $imageFolder;
+    public $imageVariable;
     public $imageSizes = false;
 
     private $file;
@@ -32,17 +31,17 @@ class FileBehavior extends Behavior
     public function init()
     {
         parent::init();
-        if ($this->fileModel === null) {
-            throw new InvalidConfigException('The "fileModel" property must be set.');
+        if ($this->imageModel === null) {
+            throw new InvalidConfigException('The "imageModel" property must be set.');
         }
         if ($this->imageSizes === null) {
             throw new InvalidConfigException('The "imageSizes" property must be set.');
         }
-        if ($this->fileFolder === null) {
-            throw new InvalidConfigException('The "fileFolder" property must be set.');
+        if ($this->imageFolder === null) {
+            throw new InvalidConfigException('The "imageFolder" property must be set.');
         }
-        if ($this->fileVar === null) {
-            throw new InvalidConfigException('The "fileVar" property must be set.');
+        if ($this->imageVariable === null) {
+            throw new InvalidConfigException('The "imageVariable" property must be set.');
         }
     }
 
@@ -61,9 +60,9 @@ class FileBehavior extends Behavior
 
     public function getImages($size = 'default', $count = false)
     {
-        $fileModelClass = $this->fileModel;
+        $imageModelClass = $this->imageModel;
         $imageSizeModel = $this->imageSizeModel;
-        $imageTableName = $fileModelClass::tableName();
+        $imageTableName = $imageModelClass::tableName();
         $tableSizeName = $imageSizeModel::tableName();
         $sql = "SELECT
                     $imageTableName.*,
@@ -75,7 +74,7 @@ class FileBehavior extends Behavior
                 WHERE
                     itemId = :itemid AND
                     size = :size";
-        $images = $fileModelClass::findBySql($sql, [
+        $images = $imageModelClass::findBySql($sql, [
             ':itemid' => $this->owner->id,
             ':size' => $size,
         ])->asArray()->all();
@@ -88,20 +87,20 @@ class FileBehavior extends Behavior
      */
     private function getFolderPath()
     {
-        return Yii::getAlias($this->fileFolder) . '/';
+        return Yii::getAlias($this->imageFolder) . '/';
     }
 
     // TODO: create exceptions
     /**
-     * Save file to disk
+     * Save image to disk
      */
-    private function saveFile($eventName)
+    private function saveImage($eventName)
     {
-        $file = $this->owner->{$this->fileVar};
+        $file = $this->owner->{$this->imageVariable};
         $error = false;
         if ($file !== null && $file !== '') {
-            $fileModelClass = $this->fileModel;
-            $transaction = $fileModelClass::getDb()->beginTransaction();
+            $imageModelClass = $this->imageModel;
+            $transaction = $imageModelClass::getDb()->beginTransaction();
 
             $successDownloaded = [];
             // save files
@@ -116,9 +115,9 @@ class FileBehavior extends Behavior
                         $deleteTempFile = true;
                     }
                     if (isset($size['folder']) && $size['folder'] !== '') {
-                        $path = $this->fileFolder . '/' . $size['folder'] . '/';
+                        $path = $this->imageFolder . '/' . $size['folder'] . '/';
                     } else {
-                        $path = $this->fileFolder . '/';
+                        $path = $this->imageFolder . '/';
                     }
                     // save to DB
                     $error = $this->addImageSize($imageId, $path, $sizeName);
@@ -143,7 +142,7 @@ class FileBehavior extends Behavior
                     }
                 }
             } else {
-                $path = $this->fileFolder . '/';
+                $path = $this->imageFolder . '/';
                 $imageId = $this->saveToDb($file);
                 $error = $this->addImageSize($imageId, $path);
                 if ($imageId !== false) {
@@ -169,21 +168,21 @@ class FileBehavior extends Behavior
     }
 
     /**
-     * Save file model
+     * Save image model
      * @param obejct $file
-     * @return integer|boolean File id or false if error
+     * @return integer|boolean Image id or false if error
      */
     private function saveToDb($file)
     {
-        $fileModelClass = $this->fileModel;
-        $fileModel = new $fileModelClass;
-        $fileModel->itemId = $this->owner->id;
-        $fileModel->name = 'temp';
-        if ($fileModel->save()) {
-            $fileName = $fileModel->id . '.' . $file->extension;
-            $fileModel->name = $fileName;
-            if ($fileModel->save()) {
-                return $fileModel->id;
+        $imageModelClass = $this->imageModel;
+        $imageModel = new $imageModelClass;
+        $imageModel->itemId = $this->owner->id;
+        $imageModel->name = 'temp';
+        if ($imageModel->save()) {
+            $fileName = $imageModel->id . '.' . $file->extension;
+            $imageModel->name = $fileName;
+            if ($imageModel->save()) {
+                return $imageModel->id;
             } else {
                 return false;
             }
@@ -219,9 +218,9 @@ class FileBehavior extends Behavior
     {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
-        $this->file = UploadedFile::getInstance($model, $this->fileVar);
+        $this->file = UploadedFile::getInstance($model, $this->imageVariable);
         if ($this->file instanceof UploadedFile) {
-            $model->{$this->fileVar} = $this->file;
+            $model->{$this->imageVariable} = $this->file;
         }
     }
 
@@ -230,6 +229,6 @@ class FileBehavior extends Behavior
      */
     public function afterSave()
     {
-        $this->saveFile($event);
+        $this->saveImage($event);
     }
 }
