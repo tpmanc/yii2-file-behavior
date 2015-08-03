@@ -17,6 +17,7 @@ use yii\web\UploadedFile;
 class FileBehavior extends Behavior
 {
     public $fileModel;
+    public $imageSizeModel;
     public $linkItemColumn = 'itemId';
     public $linkFileColumn = 'fileId';
     public $fileFolder;
@@ -33,6 +34,9 @@ class FileBehavior extends Behavior
         parent::init();
         if ($this->fileModel === null) {
             throw new InvalidConfigException('The "fileModel" property must be set.');
+        }
+        if ($this->imageSizes === null) {
+            throw new InvalidConfigException('The "imageSizes" property must be set.');
         }
         if ($this->fileFolder === null) {
             throw new InvalidConfigException('The "fileFolder" property must be set.');
@@ -55,13 +59,12 @@ class FileBehavior extends Behavior
         ];
     }
 
-    // private function getImagePath()
-    // {
-    //     return [
-    //         'origin' => $this->getFolderPath() . $this->owner->imageId . '.' . $this->owner->imageExtension,
-    //         'thumb' => $this->getFolderPath() . $this->owner->imageId . '_thumb.' . $this->owner->imageExtension,
-    //     ];
-    // }
+    public function getImages($size, $count = false)
+    {
+        $fileModelClass = $this->fileModel;
+        $images = $fileModelClass::find()->where([$this->linkItemColumn => $this->owner->id, 'size' => $size])->all();
+        return $images;
+    }
 
     /**
      * Return full path to uplaod folder
@@ -89,6 +92,7 @@ class FileBehavior extends Behavior
             if ($this->imageSizes !== false && is_array($this->imageSizes)) {
                 $sizeCount = count($this->imageSizes);
                 $sizeNumber = 0;
+                $imageId = $this->saveToDb($file);
                 foreach ($this->imageSizes as $sizeName => $size) {
                     $sizeNumber++;
                     $deleteTempFile = false;
@@ -101,8 +105,9 @@ class FileBehavior extends Behavior
                         $path = $this->fileFolder . '/';
                     }
                     // save to DB
-                    $fileName = $this->saveToDb($file, $path, $sizeName);
-                    if ($fileName !== false) {
+                    $error = $this->addImageSize($imageId, $path, $sizeName);
+                    $fileName = $imageId . '.' . $file->extension;
+                    if ($error === false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
                             $filePath = $this->getFolderPath() . $size['folder'] . '/' . $fileName;
                         } else {
@@ -123,8 +128,10 @@ class FileBehavior extends Behavior
                 }
             } else {
                 $path = $this->fileFolder . '/';
-                $fileName = $this->saveToDb($file, $path);
-                if ($fileName !== false) {
+                $imageId = $this->saveToDb($file);
+                $error = $this->addImageSize($imageId, $path);
+                if ($imageId !== false) {
+                    $fileName = $imageId . '.' . $file->extension;
                     $filePath = $this->getFolderPath() . $fileName;
                     if (!$file->saveAs($filePath)) {
                         $error = true;
@@ -147,30 +154,45 @@ class FileBehavior extends Behavior
 
     /**
      * Save file model
-     * @param object $file Active Record object
-     * @param string $path Image path
-     * @param string $size Size label
-     * @return string|booleab File name or false if error
+     * @param obejct $file
+     * @return integer|boolean File id or false if error
      */
-    private function saveToDb($file, $path, $size = 'default')
+    private function saveToDb($file)
     {
         $fileModelClass = $this->fileModel;
         $fileModel = new $fileModelClass;
         $fileModel->itemId = $this->owner->id;
-        $fileModel->image = 'temp';
-        $fileModel->path = $path;
-        $fileModel->size = $size;
-
+        $fileModel->name = 'temp';
         if ($fileModel->save()) {
             $fileName = $fileModel->id . '.' . $file->extension;
-            $fileModel->image = $fileName;
+            $fileModel->name = $fileName;
             if ($fileModel->save()) {
-                return $fileName;
+                return $fileModel->id;
             } else {
                 return false;
             }
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Add new image size
+     * @param integer $imageId Image id
+     * @param string $path Image path
+     * @param string $size Size label
+     * @return boolean Boolean result
+     */
+    private function addImageSize($imageId, $path, $size = 'default')
+    {
+        $imageSize = new $this->imageSizeModel;
+        $imageSize->imageId = $imageId;
+        $imageSize->path = $path;
+        $imageSize->size = $size;
+        if ($imageSize->save()) {
+            return false;
+        } else {
+            return true;
         }
     }
 
