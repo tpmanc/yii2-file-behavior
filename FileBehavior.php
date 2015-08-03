@@ -19,7 +19,7 @@ class FileBehavior extends Behavior
     public $fileModel;
     public $imageSizeModel;
     public $linkItemColumn = 'itemId';
-    public $linkFileColumn = 'fileId';
+    public $linkFileColumn = 'imageId';
     public $fileFolder;
     public $fileVar;
     public $imageSizes = false;
@@ -59,10 +59,26 @@ class FileBehavior extends Behavior
         ];
     }
 
-    public function getImages($size, $count = false)
+    public function getImages($size = 'default', $count = false)
     {
         $fileModelClass = $this->fileModel;
-        $images = $fileModelClass::find()->where([$this->linkItemColumn => $this->owner->id, 'size' => $size])->all();
+        $imageSizeModel = $this->imageSizeModel;
+        $imageTableName = $fileModelClass::tableName();
+        $tableSizeName = $imageSizeModel::tableName();
+        $sql = "SELECT
+                    $imageTableName.*,
+                    $tableSizeName.path,
+                    $tableSizeName.size
+                FROM
+                    $imageTableName
+                LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
+                WHERE
+                    itemId = :itemid AND
+                    size = :size";
+        $images = $fileModelClass::findBySql($sql, [
+            ':itemid' => $this->owner->id,
+            ':size' => $size,
+        ])->asArray()->all();
         return $images;
     }
 
@@ -187,7 +203,7 @@ class FileBehavior extends Behavior
     {
         $imageSize = new $this->imageSizeModel;
         $imageSize->imageId = $imageId;
-        $imageSize->path = $path;
+        $imageSize->path = str_replace('@upload', '', $path);
         $imageSize->size = $size;
         if ($imageSize->save()) {
             return false;
