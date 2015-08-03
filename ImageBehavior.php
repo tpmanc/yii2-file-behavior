@@ -94,7 +94,7 @@ class ImageBehavior extends Behavior
     /**
      * Save image to disk
      */
-    private function saveImage($eventName)
+    private function saveImage()
     {
         $file = $this->owner->{$this->imageVariable};
         $error = false;
@@ -229,6 +229,6 @@ class ImageBehavior extends Behavior
      */
     public function afterSave()
     {
-        $this->saveImage($event);
+        $this->saveImage();
     }
 }
