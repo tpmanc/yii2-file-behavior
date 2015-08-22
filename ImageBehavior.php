@@ -20,8 +20,10 @@ class ImageBehavior extends Behavior
     public $imageSizeModel;
     public $linkItemColumn = 'itemId';
     public $imageFolder;
+    public $webImageFolder;
     public $imageVariable;
     public $imageSizes = false;
+    public $noImagePath;
 
     private $file;
 
@@ -40,8 +42,14 @@ class ImageBehavior extends Behavior
         if ($this->imageFolder === null) {
             throw new InvalidConfigException('The "imageFolder" property must be set.');
         }
+        if ($this->webImageFolder === null) {
+            throw new InvalidConfigException('The "webImageFolder" property must be set.');
+        }
         if ($this->imageVariable === null) {
             throw new InvalidConfigException('The "imageVariable" property must be set.');
+        }
+        if ($this->noImagePath === null) {
+            throw new InvalidConfigException('The "noImagePath" property must be set.');
         }
     }
 
@@ -58,7 +66,7 @@ class ImageBehavior extends Behavior
         ];
     }
 
-    public function getImages($size = 'default', $count = false)
+    public function getImages($count = false, $size = 'default')
     {
         $imageModelClass = $this->imageModel;
         $imageSizeModel = $this->imageSizeModel;
@@ -86,7 +94,23 @@ class ImageBehavior extends Behavior
         } else {
             $images = $images->all();
         }
-        return $images;
+
+        $result = [];
+        if (empty($images)) {
+            $result = [
+                0 => $this->noImagePath,
+            ];
+        } else {
+            foreach ($images as $image) {
+                $result[] = $this->webImageFolder . $image['path'] . $iamge['name'];
+            }
+        }
+
+        if ($count === 1) {
+            return $result[0];
+        } else {
+            return $result;
+        }
     }
 
     /**
