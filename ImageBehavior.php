@@ -102,7 +102,7 @@ class ImageBehavior extends Behavior
             ];
         } else {
             foreach ($images as $image) {
-                $result[] = $this->webImageFolder . $image['path'] . $iamge['name'];
+                $result[] = $this->webImageFolder . $image['path'] . $image['name'];
             }
         }
 
