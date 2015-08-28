@@ -66,6 +66,12 @@ class ImageBehavior extends Behavior
         ];
     }
 
+    /**
+     * Get image array of item
+     * @param integer $count Count of images
+     * @param string $size Image size title
+     * @return string Path to first item image
+     */
     public function getImages($count = false, $size = 'default')
     {
         $imageModelClass = $this->imageModel;
@@ -104,7 +110,7 @@ class ImageBehavior extends Behavior
 
     /**
      * Get first image of item
-     * @param string $size IMage size title
+     * @param string $size Image size title
      * @return string Path to first item image
      */
     public function getImage($size = 'default')
