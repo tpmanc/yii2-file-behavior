@@ -88,29 +88,18 @@ class ImageBehavior extends Behavior
         $images = $imageModelClass::findBySql($sql, [
             ':itemid' => $this->owner->id,
             ':size' => $size,
-        ])->asArray();
-        if ($count === 1) {
-            $images = $images->one();
-        } else {
-            $images = $images->all();
-        }
+        ])->asArray()->all();
 
         $result = [];
         if (empty($images)) {
-            $result = [
-                0 => $this->noImagePath,
-            ];
+            $result[] = Yii::getAlias($this->noImagePath);
         } else {
             foreach ($images as $image) {
-                $result[] = $this->webImageFolder . $image['path'] . $image['name'];
+                $result[] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
             }
         }
 
-        if ($count === 1) {
-            return $result[0];
-        } else {
-            return $result;
-        }
+        return $result;
     }
 
     /**
