@@ -68,11 +68,11 @@ class ImageBehavior extends Behavior
 
     /**
      * Get image array of item
-     * @param integer $count Count of images
      * @param string $size Image size title
+     * @param integer $count Count of images
      * @return string Path to first item image
      */
-    public function getImages($count = false, $size = 'default')
+    public function getImages($size = 'default', $count = false)
     {
         $imageModelClass = $this->imageModel;
         $imageSizeModel = $this->imageSizeModel;
