@@ -116,7 +116,7 @@ class ImageBehavior extends Behavior
     /**
      * Get first image of item
      * @param string $size IMage size title
-     * @return string Alias to item image
+     * @return string Path to first item image
      */
     public function getImage($size = 'default')
     {
@@ -139,11 +139,10 @@ class ImageBehavior extends Behavior
             ':size' => $size,
         ])->asArray()->one();
 
-        $result = [];
         if ($image === null) {
-            return $this->noImagePath;
+            return Yii::getAlias($this->noImagePath);
         } else {
-            return $this->webImageFolder . $image['path'] . $image['name'];
+            return Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
         }
     }
 
