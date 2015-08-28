@@ -114,6 +114,40 @@ class ImageBehavior extends Behavior
     }
 
     /**
+     * Get first image of item
+     * @param string $size IMage size title
+     * @return string Alias to item image
+     */
+    public function getImage($size = 'default')
+    {
+        $imageModelClass = $this->imageModel;
+        $imageSizeModel = $this->imageSizeModel;
+        $imageTableName = $imageModelClass::tableName();
+        $tableSizeName = $imageSizeModel::tableName();
+        $sql = "SELECT
+                    $imageTableName.*,
+                    $tableSizeName.path,
+                    $tableSizeName.size
+                FROM
+                    $imageTableName
+                LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
+                WHERE
+                    itemId = :itemid AND
+                    size = :size LIMIT 1";
+        $image = $imageModelClass::findBySql($sql, [
+            ':itemid' => $this->owner->id,
+            ':size' => $size,
+        ])->asArray()->one();
+
+        $result = [];
+        if ($image === null) {
+            return $this->noImagePath;
+        } else {
+            return $this->webImageFolder . $image['path'] . $image['name'];
+        }
+    }
+
+    /**
      * Return full path to uplaod folder
      * @return string Path to upload folder
      */
