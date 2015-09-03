@@ -301,7 +301,7 @@ class ImageBehavior extends Behavior
     }
 
     /**
-     * Delete category image by id
+     * Delete image by id
      * @param integer $imageId Image id
      */
     public function deleteImage($imageId)
@@ -311,6 +311,24 @@ class ImageBehavior extends Behavior
 
         $image = $imageModelClass::findOne($imageId);
         if ($image !== null) {
+            $sizes = $imageSizeClass::find()->where(['imageId' => $image->id])->all();
+            foreach ($sizes as $size) {
+                unlink($this->getFolderPath() . $size->path . '/' . $image->name);
+            }
+            $image->delete();
+        }
+    }
+
+    /**
+     * Delete all images
+     */
+    public function deleteAll()
+    {
+        $imageModelClass = $this->imageModel;
+        $imageSizeClass = $this->imageSizeModel;
+
+        $images = $imageModelClass::find()->where([$this->linkItemColumn => $this->owner->id])->all();
+        foreach ($images as $image) {
             $sizes = $imageSizeClass::find()->where(['imageId' => $image->id])->all();
             foreach ($sizes as $size) {
                 unlink($this->getFolderPath() . $size->path . '/' . $image->name);
