@@ -168,7 +168,9 @@ class ImageBehavior extends Behavior
             if ($this->imageSizes !== false && is_array($this->imageSizes)) {
                 $sizeCount = count($this->imageSizes);
                 $sizeNumber = 0;
-                $imageId = $this->saveToDb($file);
+                $saveInfo = $this->saveToDb($file);
+                $imageId = $saveInfo['id'];
+                $isExist = $saveInfo['exist'];
                 foreach ($this->imageSizes as $sizeName => $size) {
                     $sizeNumber++;
                     $deleteTempFile = false;
@@ -181,7 +183,11 @@ class ImageBehavior extends Behavior
                         $path = $this->imageFolder . '/';
                     }
                     // save to DB
-                    $error = $this->addImageSize($imageId, $path, $sizeName);
+                    if ($isExist === false) {
+                        $error = $this->addImageSize($imageId, $path, $sizeName);
+                    } else {
+                        $error = false;
+                    }
                     $fileName = $imageId . '.' . $file->extension;
                     if ($error === false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
@@ -204,8 +210,14 @@ class ImageBehavior extends Behavior
                 }
             } else {
                 $path = $this->imageFolder . '/';
-                $imageId = $this->saveToDb($file);
-                $error = $this->addImageSize($imageId, $path);
+                $saveInfo = $this->saveToDb($file);
+                $imageId = $saveInfo['id'];
+                $isExist = $saveInfo['exist'];
+                if ($isExist === false) {
+                    $error = $this->addImageSize($imageId, $path);
+                } else {
+                    $error = false;
+                }
                 if ($imageId !== false) {
                     $fileName = $imageId . '.' . $file->extension;
                     $filePath = $this->getFolderPath() . $fileName;
@@ -245,14 +257,20 @@ class ImageBehavior extends Behavior
                 $fileName = $imageModel->id . '.' . $file->extension;
                 $imageModel->name = $fileName;
                 if ($imageModel->save()) {
-                    return $imageModel->id;
+                    return [
+                        'exist' => false,
+                        'id' => $imageModel->id,
+                    ];
                 }
             }
         } else {
             // find exist image record
             $imageModel = $imageModelClass::find()->where([$this->linkItemColumn => $this->owner->id])->one();
             if ($imageModel !== null) {
-                return $imageModel->id;
+                return [
+                    'exist' => true,
+                    'id' => $imageModel->id,
+                ];
             }
         }
         return false;
@@ -275,6 +293,25 @@ class ImageBehavior extends Behavior
             return false;
         } else {
             return true;
+        }
+    }
+
+    /**
+     * Delete category image by id
+     * @param integer $imageId Image id
+     */
+    public function deleteImage($imageId)
+    {
+        $imageModelClass = $this->imageModel;
+        $imageSizeClass = $this->imageSizeModel;
+
+        $image = $imageModelClass::findOne($imageId);
+        if ($image !== null) {
+            $sizes = $imageSizeClass::find()->where(['imageId' => $image->id])->all();
+            foreach ($sizes as $size) {
+                unlink($this->getFolderPath() . $size->path . '/' . $image->name);
+            }
+            // $image->delete();
         }
     }
 
