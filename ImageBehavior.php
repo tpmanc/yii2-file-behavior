@@ -338,6 +338,14 @@ class ImageBehavior extends Behavior
     }
 
     /**
+     * Invoked before delete model
+     */
+    public function beforeDelete()
+    {
+        $this->deleteAll();
+    }
+
+    /**
      * Invoked before validation starts.
      */
     public function beforeValidate()
