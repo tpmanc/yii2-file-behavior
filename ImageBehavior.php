@@ -10,6 +10,7 @@ use yii\base\Event;
 use tpmanc\imagick\Imagick;
 use yii\db\BaseActiveRecord;
 use yii\web\UploadedFile;
+use yii\web\ServerErrorHttpException;
 
 /**
  * Image behavior
@@ -148,7 +149,7 @@ class ImageBehavior extends Behavior
      */
     private function getFolderPath()
     {
-        return Yii::getAlias($this->imageFolder) . '/';
+        return Yii::getAlias($this->imageFolder);
     }
 
     // TODO: create exceptions
@@ -171,6 +172,9 @@ class ImageBehavior extends Behavior
                 $saveInfo = $this->saveToDb($file);
                 $imageId = $saveInfo['id'];
                 $isExist = $saveInfo['exist'];
+                if ($imageId === false) {
+                    throw new ServerErrorHttpException("Cant save to DB");
+                }
                 foreach ($this->imageSizes as $sizeName => $size) {
                     $sizeNumber++;
                     $deleteTempFile = false;
@@ -191,7 +195,7 @@ class ImageBehavior extends Behavior
                     $fileName = $imageId . '.' . $file->extension;
                     if ($error === false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
-                            $filePath = $this->getFolderPath() . $size['folder'] . '/' . $fileName;
+                            $filePath = $this->getFolderPath() . '/' . $size['folder'] . '/' . $fileName;
                         } else {
                             $filePath = $this->getFolderPath() . '/' . $fileName;
                         }
@@ -248,27 +252,27 @@ class ImageBehavior extends Behavior
     private function saveToDb($file)
     {
         $imageModelClass = $this->imageModel;
-        
-        if ($this->multiple === true) {
-            $imageModel = new $imageModelClass;
-            $imageModel->itemId = $this->owner->id;
-            $imageModel->name = 'temp';
-            if ($imageModel->save()) {
-                $fileName = $imageModel->id . '.' . $file->extension;
-                $imageModel->name = $fileName;
-                if ($imageModel->save()) {
-                    return [
-                        'exist' => false,
-                        'id' => $imageModel->id,
-                    ];
-                }
-            }
-        } else {
+
+        if ($this->multiple === false) {
             // find exist image record
             $imageModel = $imageModelClass::find()->where([$this->linkItemColumn => $this->owner->id])->one();
             if ($imageModel !== null) {
                 return [
                     'exist' => true,
+                    'id' => $imageModel->id,
+                ];
+            }
+        }
+        
+        $imageModel = new $imageModelClass;
+        $imageModel->itemId = $this->owner->id;
+        $imageModel->name = 'temp';
+        if ($imageModel->save()) {
+            $fileName = $imageModel->id . '.' . $file->extension;
+            $imageModel->name = $fileName;
+            if ($imageModel->save()) {
+                return [
+                    'exist' => false,
                     'id' => $imageModel->id,
                 ];
             }
@@ -311,7 +315,7 @@ class ImageBehavior extends Behavior
             foreach ($sizes as $size) {
                 unlink($this->getFolderPath() . $size->path . '/' . $image->name);
             }
-            // $image->delete();
+            $image->delete();
         }
     }
 
