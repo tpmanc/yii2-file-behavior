@@ -99,10 +99,10 @@ class ImageBehavior extends Behavior
 
         $result = [];
         if (empty($images)) {
-            $result[] = Yii::getAlias($this->noImagePath);
+            $result[0] = Yii::getAlias($this->noImagePath);
         } else {
             foreach ($images as $image) {
-                $result[] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
+                $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
             }
         }
 
