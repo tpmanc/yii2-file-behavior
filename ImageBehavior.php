@@ -24,6 +24,7 @@ class ImageBehavior extends Behavior
     public $imageVariable;
     public $imageSizes = false;
     public $noImagePath;
+    public $multiple = false;
 
     private $file;
 
@@ -235,20 +236,26 @@ class ImageBehavior extends Behavior
     private function saveToDb($file)
     {
         $imageModelClass = $this->imageModel;
-        $imageModel = new $imageModelClass;
-        $imageModel->itemId = $this->owner->id;
-        $imageModel->name = 'temp';
-        if ($imageModel->save()) {
-            $fileName = $imageModel->id . '.' . $file->extension;
-            $imageModel->name = $fileName;
+        
+        if ($this->multiple === true) {
+            $imageModel = new $imageModelClass;
+            $imageModel->itemId = $this->owner->id;
+            $imageModel->name = 'temp';
             if ($imageModel->save()) {
-                return $imageModel->id;
-            } else {
-                return false;
+                $fileName = $imageModel->id . '.' . $file->extension;
+                $imageModel->name = $fileName;
+                if ($imageModel->save()) {
+                    return $imageModel->id;
+                }
             }
         } else {
-            return false;
+            // find exist image record
+            $imageModel = $imageModelClass::find()->where([$this->linkItemColumn => $this->owner->id])->one();
+            if ($imageModel !== null) {
+                return $imageModel->id;
+            }
         }
+        return false;
     }
 
     /**
