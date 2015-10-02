@@ -68,7 +68,7 @@ use tpmanc\filebehavior\FileBehavior;
 
     public function rules()
     {
-        ['file', 'file', 'extensions' => ['png', 'jpg'], 'maxSize' => 1024*1024*1024],
+        ['file', 'file', 'extensions' => ['png', 'jpg'], 'maxSize' => 1024*1024*1024, 'maxFiles' => 4],
     }
 
 ```
@@ -109,7 +109,7 @@ To save several sizes of image add:
 
     public function rules()
     {
-        ['file', 'file', 'extensions' => ['png', 'jpg'], 'maxSize' => 1024*1024*1024],
+        ['file', 'file', 'extensions' => ['png', 'jpg'], 'maxSize' => 1024*1024*1024, 'maxFiles' => 1],
     }
 ```
 
@@ -127,7 +127,7 @@ Example of view file
 
 ```html
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]) ?>
-    <?= $form->field($model, 'file')->fileInput() ?>
+    <?= $form->field($model, 'file[]')->fileInput(['multiple' => true, 'accept' => 'image/*']) ?>
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
