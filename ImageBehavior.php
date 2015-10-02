@@ -27,7 +27,7 @@ class ImageBehavior extends Behavior
     public $noImagePath;
     public $multiple = false;
 
-    private $file;
+    private $files;
 
     /**
      * @inheritdoc
@@ -156,9 +156,9 @@ class ImageBehavior extends Behavior
     /**
      * Save image to disk
      */
-    private function saveImage()
+    private function saveImage($file)
     {
-        $file = $this->owner->{$this->imageVariable};
+        // $file = $this->owner->{$this->imageVariable};
         $error = false;
         if ($file !== null && $file !== '') {
             $imageModelClass = $this->imageModel;
@@ -352,9 +352,9 @@ class ImageBehavior extends Behavior
     {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
-        $this->file = UploadedFile::getInstance($model, $this->imageVariable);
-        if ($this->file instanceof UploadedFile) {
-            $model->{$this->imageVariable} = $this->file;
+        $this->files = UploadedFile::getInstances($model, $this->imageVariable);
+        if ($this->files instanceof UploadedFile) {
+            $model->{$this->imageVariable} = $this->files;
         }
     }
 
@@ -363,6 +363,8 @@ class ImageBehavior extends Behavior
      */
     public function afterSave()
     {
-        $this->saveImage();
+        foreach ($this->files as $file) {
+            $this->saveImage($file);
+        }
     }
 }
