@@ -89,7 +89,8 @@ class ImageBehavior extends Behavior
                 LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
                 WHERE
                     itemId = :itemid AND
-                    size = :size";
+                    size = :size
+                ORDER BY `order` ASC";
         if ($count !== false) {
             $sql .= " LIMIT $count";
         }
