@@ -74,7 +74,7 @@ class ImageBehavior extends Behavior
      * @param integer $count Count of images
      * @return string Path to first item image
      */
-    public function getImages($size = 'default', $count = false)
+    public function getImages($size = 'default', $count = false, $returnFalseOnNoImage = false)
     {
         $imageModelClass = $this->imageModel;
         $imageSizeModel = $this->imageSizeModel;
@@ -100,7 +100,11 @@ class ImageBehavior extends Behavior
 
         $result = [];
         if (empty($images)) {
-            $result[0] = Yii::getAlias($this->noImagePath);
+            if ($returnFalseOnNoImage) {
+                $result = false;
+            } else {
+                $result[0] = Yii::getAlias($this->noImagePath);
+            }
         } else {
             foreach ($images as $image) {
                 $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
