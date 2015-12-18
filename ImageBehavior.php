@@ -92,7 +92,7 @@ class ImageBehavior extends Behavior
                     itemId = :itemid AND
                     size = :size";
         if ($this->orderField !== false) {
-            $sql .= ' ORDER BY `order` ASC';
+            $sql .= ' ORDER BY `' . $this->orderField . '` ASC';
         }
         if ($count !== false) {
             $sql .= " LIMIT $count";
