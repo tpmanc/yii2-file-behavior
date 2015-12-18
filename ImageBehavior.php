@@ -26,6 +26,7 @@ class ImageBehavior extends Behavior
     public $imageSizes = false;
     public $noImagePath;
     public $multiple = false;
+    public $orderField = false;
 
     private $files;
 
@@ -89,8 +90,10 @@ class ImageBehavior extends Behavior
                 LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
                 WHERE
                     itemId = :itemid AND
-                    size = :size
-                ORDER BY `order` ASC";
+                    size = :size";
+        if ($this->orderField !== false) {
+            $sql .= ' ORDER BY `order` ASC';
+        }
         if ($count !== false) {
             $sql .= " LIMIT $count";
         }
