@@ -123,7 +123,7 @@ class ImageBehavior extends Behavior
      * @param string $size Image size title
      * @return string Path to first item image
      */
-    public function getImage($size = 'default')
+    public function getImage($size = 'default', $returnFalseOnNoImage = false)
     {
         $imageModelClass = $this->imageModel;
         $imageSizeModel = $this->imageSizeModel;
@@ -145,7 +145,11 @@ class ImageBehavior extends Behavior
         ])->asArray()->one();
 
         if ($image === null) {
-            return Yii::getAlias($this->noImagePath);
+            if ($returnFalseOnNoImage) {
+                return false;
+            } else {
+                return Yii::getAlias($this->noImagePath);
+            }
         } else {
             return Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
         }

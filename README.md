@@ -133,3 +133,52 @@ Example of view file
     </div>
 <?php ActiveForm::end(); ?>
 ```  
+
+## Geting images
+
+Get single image:
+
+```html
+<img src="<?= $model->getImage('original') ?>" alt="">
+<img src="<?= $model->getImage('big') ?>" alt="">
+<img src="<?= $model->getImage('small') ?>" alt="">
+```
+
+Get all images:
+
+```html
+<?php foreach ($model->getImages('original') as $image) { ?>
+    <img src="<?= $image ?>" alt="">
+<?php } ?>
+```
+
+Get `count` images:
+
+```html
+<?php $count = 5;?>
+...
+<?php foreach ($model->getImages('original', $count) as $image) { ?>
+    <img src="<?= $image ?>" alt="">
+<?php } ?>
+```
+
+Return `false` when image does not exist:
+
+For single image:
+
+```php
+if ($model->getImage('original', true) === false) {
+    ...
+}
+```
+
+For all images:
+
+```php
+$count = false;
+foreach ($model->getImages('original', $count, true) as $image) {
+    if ($image === false) {
+        ...
+    }
+}
+```
