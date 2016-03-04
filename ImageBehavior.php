@@ -82,15 +82,15 @@ class ImageBehavior extends Behavior
         $imageTableName = $imageModelClass::tableName();
         $tableSizeName = $imageSizeModel::tableName();
         $sql = "SELECT
-                    $imageTableName.*,
-                    $tableSizeName.path,
-                    $tableSizeName.size
+                    {{{$imageTableName}}}.*,
+                    {{{$tableSizeName}}}.[[path]],
+                    {{{$tableSizeName}}}.[[size]]
                 FROM
-                    $imageTableName
-                LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
+                    {{{$imageTableName}}}
+                LEFT JOIN {{{$tableSizeName}}} ON {{{$tableSizeName}}}.[[imageId]] = {{{$imageTableName}}}.[[id]]
                 WHERE
-                    itemId = :itemid AND
-                    size = :size";
+                    [[itemId]] = :itemid AND
+                    [[size]] = :size";
         if ($this->orderField !== false) {
             $sql .= ' ORDER BY `' . $this->orderField . '` ASC';
         }
@@ -130,15 +130,15 @@ class ImageBehavior extends Behavior
         $imageTableName = $imageModelClass::tableName();
         $tableSizeName = $imageSizeModel::tableName();
         $sql = "SELECT
-                    $imageTableName.*,
-                    $tableSizeName.path,
-                    $tableSizeName.size
+                    {{{$imageTableName}}}.*,
+                    {{{$tableSizeName}}}.[[path]],
+                    {{{$tableSizeName}}}.[[size]]
                 FROM
-                    $imageTableName
-                LEFT JOIN $tableSizeName ON $tableSizeName.imageId = $imageTableName.id
+                    {{{$imageTableName}}}
+                LEFT JOIN {{{$tableSizeName}}} ON {{{$tableSizeName}}}.[[imageId]] = {{{$imageTableName}}}.[[id]]
                 WHERE
-                    itemId = :itemid AND
-                    size = :size LIMIT 1";
+                    [[itemId]] = :itemid AND
+                    [[size]] = :size LIMIT 1";
         $image = $imageModelClass::findBySql($sql, [
             ':itemid' => $this->owner->id,
             ':size' => $size,
