@@ -92,7 +92,7 @@ class ImageBehavior extends Behavior
                     [[itemId]] = :itemid AND
                     [[size]] = :size";
         if ($this->orderField !== false) {
-            $sql .= ' ORDER BY `' . $this->orderField . '` ASC';
+            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC';
         }
         if ($count !== false) {
             $sql .= " LIMIT $count";
@@ -111,7 +111,7 @@ class ImageBehavior extends Behavior
             }
         } else {
             foreach ($images as $image) {
-                $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
+                $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['id'] . '.' . $image['extension']);
             }
         }
 
@@ -151,7 +151,7 @@ class ImageBehavior extends Behavior
                 return Yii::getAlias($this->noImagePath);
             }
         } else {
-            return Yii::getAlias($this->webImageFolder . $image['path'] . $image['name']);
+            return Yii::getAlias($this->webImageFolder . $image['path'] . $image['id'] . '.' . $image['extension']);
         }
     }
 
@@ -175,13 +175,14 @@ class ImageBehavior extends Behavior
         if ($file !== null && $file !== '') {
             $imageModelClass = $this->imageModel;
             $transaction = $imageModelClass::getDb()->beginTransaction();
+            $hash = md5_file($file->tempName);
 
             $successDownloaded = [];
             // save files
             if ($this->imageSizes !== false && is_array($this->imageSizes)) {
                 $sizeCount = count($this->imageSizes);
                 $sizeNumber = 0;
-                $saveInfo = $this->saveToDb($file);
+                $saveInfo = $this->saveToDb($file, $hash);
                 $imageId = $saveInfo['id'];
                 $isExist = $saveInfo['exist'];
                 if ($imageId === false) {
@@ -198,6 +199,11 @@ class ImageBehavior extends Behavior
                     } else {
                         $path = $this->imageFolder . '/';
                     }
+                    $hashDir = $hash[0] . $hash[1] . '/' . $hash[2] . $hash[4];
+                    $path .= $hashDir . '/';
+                    if (!file_exists(Yii::getAlias($path))) {
+                        mkdir(Yii::getAlias($path), 0777, true);
+                    }
                     // save to DB
                     if ($isExist === false) {
                         $error = $this->addImageSize($imageId, $path, $sizeName);
@@ -207,7 +213,7 @@ class ImageBehavior extends Behavior
                     $fileName = $imageId . '.' . $file->extension;
                     if ($error === false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
-                            $filePath = $this->getFolderPath() . '/' . $size['folder'] . '/' . $fileName;
+                            $filePath = $this->getFolderPath() . '/' . $size['folder'] . '/' . $hashDir . '/' . $fileName;
                         } else {
                             $filePath = $this->getFolderPath() . '/' . $fileName;
                         }
@@ -226,7 +232,7 @@ class ImageBehavior extends Behavior
                 }
             } else {
                 $path = $this->imageFolder . '/';
-                $saveInfo = $this->saveToDb($file);
+                $saveInfo = $this->saveToDb($file, $hash);
                 $imageId = $saveInfo['id'];
                 $isExist = $saveInfo['exist'];
                 if ($isExist === false) {
@@ -261,7 +267,7 @@ class ImageBehavior extends Behavior
      * @param obejct $file
      * @return integer|boolean Image id or false if error
      */
-    private function saveToDb($file)
+    private function saveToDb($file, $hash)
     {
         $imageModelClass = $this->imageModel;
 
@@ -278,16 +284,17 @@ class ImageBehavior extends Behavior
         
         $imageModel = new $imageModelClass;
         $imageModel->itemId = $this->owner->id;
-        $imageModel->name = 'temp';
+        $imageModel->extension = $file->extension;
+        $imageModel->hash = $hash;
+        $imageModel->order = 0;
         if ($imageModel->save()) {
-            $fileName = $imageModel->id . '.' . $file->extension;
-            $imageModel->name = $fileName;
-            if ($imageModel->save()) {
-                return [
-                    'exist' => false,
-                    'id' => $imageModel->id,
-                ];
-            }
+            return [
+                'exist' => false,
+                'id' => $imageModel->id,
+            ];
+        } else {
+            var_dump($imageModel->errors);
+            die();
         }
         return false;
     }
