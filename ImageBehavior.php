@@ -27,6 +27,7 @@ class ImageBehavior extends Behavior
     public $noImagePath;
     public $multiple = false;
     public $orderField = false;
+    public $isHashEnabled = true;
 
     private $files;
 
@@ -175,7 +176,11 @@ class ImageBehavior extends Behavior
         if ($file !== null && $file !== '') {
             $imageModelClass = $this->imageModel;
             $transaction = $imageModelClass::getDb()->beginTransaction();
-            $hash = md5_file($file->tempName);
+            if ($this->isHashEnabled) {
+                $hash = md5_file($file->tempName);
+            } else {
+                $hash = false;
+            }
 
             $successDownloaded = [];
             // save files
@@ -199,8 +204,10 @@ class ImageBehavior extends Behavior
                     } else {
                         $path = $this->imageFolder . '/';
                     }
-                    $hashDir = $hash[0] . $hash[1] . '/' . $hash[2] . $hash[4];
+                    if ($hash !== false)
+                        $hashDir = $hash[0] . $hash[1] . '/' . $hash[2] . $hash[4];
                     $path .= $hashDir . '/';
+                    }
                     if (!file_exists(Yii::getAlias($path))) {
                         mkdir(Yii::getAlias($path), 0777, true);
                     }
@@ -213,7 +220,11 @@ class ImageBehavior extends Behavior
                     $fileName = $imageId . '.' . $file->extension;
                     if ($error === false) {
                         if (isset($size['folder']) && $size['folder'] !== '') {
-                            $filePath = $this->getFolderPath() . '/' . $size['folder'] . '/' . $hashDir . '/' . $fileName;
+                            $filePath = $this->getFolderPath() . '/' . $size['folder'];
+                            if ($hash !== false) {
+                                $filePath .= '/' . $hashDir
+                            }
+                            $filePath .= '/' . $fileName;
                         } else {
                             $filePath = $this->getFolderPath() . '/' . $fileName;
                         }
@@ -285,7 +296,9 @@ class ImageBehavior extends Behavior
         $imageModel = new $imageModelClass;
         $imageModel->itemId = $this->owner->id;
         $imageModel->extension = $file->extension;
-        $imageModel->hash = $hash;
+        if ($hash !== false) {
+            $imageModel->hash = $hash;
+        }
         $imageModel->order = 0;
         if ($imageModel->save()) {
             return [
