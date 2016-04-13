@@ -204,9 +204,9 @@ class ImageBehavior extends Behavior
                     } else {
                         $path = $this->imageFolder . '/';
                     }
-                    if ($hash !== false)
+                    if ($hash !== false) {
                         $hashDir = $hash[0] . $hash[1] . '/' . $hash[2] . $hash[4];
-                    $path .= $hashDir . '/';
+                        $path .= $hashDir . '/';
                     }
                     if (!file_exists(Yii::getAlias($path))) {
                         mkdir(Yii::getAlias($path), 0777, true);
@@ -222,7 +222,7 @@ class ImageBehavior extends Behavior
                         if (isset($size['folder']) && $size['folder'] !== '') {
                             $filePath = $this->getFolderPath() . '/' . $size['folder'];
                             if ($hash !== false) {
-                                $filePath .= '/' . $hashDir
+                                $filePath .= '/' . $hashDir;
                             }
                             $filePath .= '/' . $fileName;
                         } else {
