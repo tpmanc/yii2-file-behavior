@@ -345,7 +345,7 @@ class ImageBehavior extends Behavior
         if ($image !== null) {
             $sizes = $imageSizeClass::find()->where(['imageId' => $image->id])->all();
             foreach ($sizes as $size) {
-                unlink($this->getFolderPath() . $size->path . '/' . $image->name);
+                unlink($this->getFolderPath() . $size->path . '/' . $image->id . '.' . $image->extension);
                 $size->delete();
             }
             $image->delete();
