@@ -30,10 +30,17 @@ and add following code to `up()` method
 
 
 ```php
-        $this->createTable('images', [
+        $this->createTable('image', [
             'id' => Schema::TYPE_PK,
             'itemId' => Schema::TYPE_INTEGER . ' NOT NULL',
-            'image' => Schema::TYPE_STRING . '(255) NOT NULL',
+            'order' => Schema::TYPE_INTEGER . ' NOT NULL',
+            'extension' => Schema::TYPE_STRING . '(10) NOT NULL',
+            'hash' => Schema::TYPE_STRING . '(32) NOT NULL',
+        ]);
+
+        $this->createTable('imageSize', [
+            'id' => Schema::TYPE_PK,
+            'imageId' => Schema::TYPE_INTEGER . ' NOT NULL',
             'path' => Schema::TYPE_STRING . '(255) NOT NULL',
             'size' => Schema::TYPE_STRING . '(255) NOT NULL',
         ]);
@@ -41,14 +48,14 @@ and add following code to `up()` method
 
 ## Create model
 
-Generate Active Record model for new `image` table
+Generate Active Record model for new `image` and `imageSize` tables
 
 ## Configuring
 
 Attach the behavior to your model class:
 
 ```php
-use tpmanc\filebehavior\FileBehavior;
+use tpmanc\filebehavior\ImageBehavior;
 
 \\ ...
 
@@ -59,9 +66,12 @@ use tpmanc\filebehavior\FileBehavior;
         return [
             'FileBehavior' => [
                 'class' => FileBehavior::className(),
-                'fileModel' => 'models\Image',
-                'fileVar' => 'file',
-                'fileFolder' => '@upload/images',
+                'imageModel' => 'models\Image',
+                'imageSizeModel' => 'models\ImageSize',
+                'imageVariable' => 'file',
+                'imageFolder' => '@upload',
+                'webImageFolder' => '@webupload',
+                'noImagePath' => '@webupload/no-image.png',
             ],
         ];
     }
@@ -73,7 +83,8 @@ use tpmanc\filebehavior\FileBehavior;
 
 ```
 
-The file will be located in `@upload/images/{id from image table}.jpg`
+If file hash will be like "6e3c797abee0ff2803ef1f952f187d2f" 
+the file will be located in `@upload/images/6e/3c/{id from image table}.jpg`
 
 To save several sizes of image add:
 
@@ -113,13 +124,13 @@ To save several sizes of image add:
     }
 ```
 
-Result - 3 images:
+If file hash will be like "6e3c797abee0ff2803ef1f952f187d2f" - result 3 images:
 
-- `@upload/images/original/{id from image table}.jpg`
+- `@upload/images/original/6e/3c/{id from image table}.jpg`
 
-- `@upload/images/big/{id from image table}.jpg`
+- `@upload/images/big/6e/3c/{id from image table}.jpg`
 
-- `@upload/images/small/{id from image table}.jpg`
+- `@upload/images/small/6e/3c/{id from image table}.jpg`
 
 ## View file
 
