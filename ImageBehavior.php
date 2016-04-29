@@ -178,6 +178,7 @@ class ImageBehavior extends Behavior
             $transaction = $imageModelClass::getDb()->beginTransaction();
             if ($this->isHashEnabled) {
                 $hash = md5_file($file->tempName);
+                $hashDir = $hash[0] . $hash[1] . '/' . $hash[2] . $hash[4];
             } else {
                 $hash = false;
             }
@@ -253,6 +254,13 @@ class ImageBehavior extends Behavior
                 }
                 if ($imageId !== false) {
                     $fileName = $imageId . '.' . $file->extension;
+
+                    $filePath = $this->getFolderPath() . '/' . $size['folder'];
+                    if ($hash !== false) {
+                        $filePath .= '/' . $hashDir;
+                    }
+                    $filePath .= '/' . $fileName;
+
                     $filePath = $this->getFolderPath() . '/' . $fileName;
                     if (!$file->saveAs($filePath)) {
                         $error = true;
