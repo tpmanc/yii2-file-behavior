@@ -253,7 +253,7 @@ class ImageBehavior extends Behavior
                 }
                 if ($imageId !== false) {
                     $fileName = $imageId . '.' . $file->extension;
-                    $filePath = $this->getFolderPath() . $fileName;
+                    $filePath = $this->getFolderPath() . '/' . $fileName;
                     if (!$file->saveAs($filePath)) {
                         $error = true;
                     }
