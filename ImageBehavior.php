@@ -255,7 +255,7 @@ class ImageBehavior extends Behavior
                 if ($imageId !== false) {
                     $fileName = $imageId . '.' . $file->extension;
 
-                    $filePath = $this->getFolderPath() . '/' . $size['folder'];
+                    $filePath = $this->getFolderPath();
                     if ($hash !== false) {
                         $filePath .= '/' . $hashDir;
                     }
