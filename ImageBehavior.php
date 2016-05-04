@@ -294,10 +294,7 @@ class ImageBehavior extends Behavior
             // find exist image record
             $imageModel = $imageModelClass::find()->where([$this->linkItemColumn => $this->owner->id])->one();
             if ($imageModel !== null) {
-                return [
-                    'exist' => true,
-                    'id' => $imageModel->id,
-                ];
+                $this->deleteImage($imageModel->id);
             }
         }
         
