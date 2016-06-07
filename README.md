@@ -64,8 +64,8 @@ use tpmanc\filebehavior\ImageBehavior;
     public function behaviors()
     {
         return [
-            'FileBehavior' => [
-                'class' => FileBehavior::className(),
+            'ImageBehavior' => [
+                'class' => ImageBehavior::className(),
                 'imageModel' => 'models\Image',
                 'imageSizeModel' => 'models\ImageSize',
                 'imageVariable' => 'file',
@@ -94,8 +94,8 @@ To save several sizes of image add:
     public function behaviors()
     {
         return [
-            'FileBehavior' => [
-                'class' => FileBehavior::className(),
+            'ImageBehavior' => [
+                'class' => ImageBehavior::className(),
                 'fileModel' => 'models\Image',
                 'fileVar' => 'file',
                 'fileFolder' => '@upload/images',
