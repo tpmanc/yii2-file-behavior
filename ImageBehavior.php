@@ -304,7 +304,9 @@ class ImageBehavior extends Behavior
         if ($hash !== false) {
             $imageModel->hash = $hash;
         }
-        $imageModel->order = 0;
+        if ($this->orderField !== false) {
+            $imageModel->{$this->orderField} = 0;
+        }
         if ($imageModel->save()) {
             return [
                 'exist' => false,
@@ -350,7 +352,9 @@ class ImageBehavior extends Behavior
         if ($image !== null) {
             $sizes = $imageSizeClass::find()->where(['imageId' => $image->id])->all();
             foreach ($sizes as $size) {
-                unlink($this->getFolderPath() . $size->path . '/' . $image->id . '.' . $image->extension);
+                try {
+                    unlink($this->getFolderPath() . $size->path . $image->id . '.' . $image->extension);
+                } catch (\Exception $e) {}
                 $size->delete();
             }
             $image->delete();
