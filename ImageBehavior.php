@@ -232,7 +232,7 @@ class ImageBehavior extends Behavior
                         if ($file->saveAs($filePath, $deleteTempFile)) {
                             $successDownloaded[] = $filePath;
                             if (isset($size['width']) && isset($size['height'])) {
-                                Imagick::open($filePath)->resize($size['width'], $size['height'])->saveTo($filePath);
+                                Imagick::open($filePath)->thumb($size['width'], $size['height'])->saveTo($filePath);
                             }
                         } else {
                             $error = true;
