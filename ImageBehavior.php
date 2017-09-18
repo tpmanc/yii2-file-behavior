@@ -139,7 +139,11 @@ class ImageBehavior extends Behavior
                 LEFT JOIN {{{$tableSizeName}}} ON {{{$tableSizeName}}}.[[imageId]] = {{{$imageTableName}}}.[[id]]
                 WHERE
                     [[itemId]] = :itemid AND
-                    [[size]] = :size LIMIT 1";
+                    [[size]] = :size ";
+        if ($this->orderField !== false) {
+            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC';
+        }
+        $sql .= ' LIMIT 1';
         $image = $imageModelClass::findBySql($sql, [
             ':itemid' => $this->owner->id,
             ':size' => $size,
