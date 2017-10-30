@@ -93,7 +93,7 @@ class ImageBehavior extends Behavior
                     [[itemId]] = :itemid AND
                     [[size]] = :size";
         if ($this->orderField !== false) {
-            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC';
+            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC, [[id]] ASC';
         }
         if ($count !== false) {
             $sql .= " LIMIT $count";
@@ -141,7 +141,7 @@ class ImageBehavior extends Behavior
                     [[itemId]] = :itemid AND
                     [[size]] = :size ";
         if ($this->orderField !== false) {
-            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC';
+            $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC, [[id]] ASC';
         }
         $sql .= ' LIMIT 1';
         $image = $imageModelClass::findBySql($sql, [
