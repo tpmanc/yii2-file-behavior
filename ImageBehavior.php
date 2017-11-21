@@ -90,7 +90,7 @@ class ImageBehavior extends Behavior
                     {{{$imageTableName}}}
                 LEFT JOIN {{{$tableSizeName}}} ON {{{$tableSizeName}}}.[[imageId]] = {{{$imageTableName}}}.[[id]]
                 WHERE
-                    [[itemId]] = :itemid AND
+                    [[{$this->linkItemColumn}]] = :itemid AND
                     [[size]] = :size";
         if ($this->orderField !== false) {
             $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC, [[id]] ASC';
@@ -138,7 +138,7 @@ class ImageBehavior extends Behavior
                     {{{$imageTableName}}}
                 LEFT JOIN {{{$tableSizeName}}} ON {{{$tableSizeName}}}.[[imageId]] = {{{$imageTableName}}}.[[id]]
                 WHERE
-                    [[itemId]] = :itemid AND
+                    [[{$this->linkItemColumn}]] = :itemid AND
                     [[size]] = :size ";
         if ($this->orderField !== false) {
             $sql .= ' ORDER BY [[' . $this->orderField . ']] ASC, [[id]] ASC';
@@ -303,7 +303,7 @@ class ImageBehavior extends Behavior
         }
         
         $imageModel = new $imageModelClass;
-        $imageModel->itemId = $this->owner->id;
+        $imageModel->{$this->linkItemColumn} = $this->owner->id;
         $imageModel->extension = $file->extension;
         if ($hash !== false) {
             $imageModel->hash = $hash;
