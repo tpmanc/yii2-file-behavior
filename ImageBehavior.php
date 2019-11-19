@@ -28,6 +28,7 @@ class ImageBehavior extends Behavior
     public $multiple = false;
     public $orderField = false;
     public $isHashEnabled = true;
+    public $watermark = null;
 
     private $files;
 
@@ -236,7 +237,10 @@ class ImageBehavior extends Behavior
                         if ($file->saveAs($filePath, $deleteTempFile)) {
                             $successDownloaded[] = $filePath;
                             if (isset($size['width']) && isset($size['height'])) {
-                                Imagick::open($filePath)->thumb($size['width'], $size['height'])->saveTo($filePath);
+                                Imagick::open($filePath)
+                                    ->thumb($size['width'], $size['height'])
+                                    ->watermark($this->watermark)
+                                    ->saveTo($filePath);
                             }
                         } else {
                             $error = true;
