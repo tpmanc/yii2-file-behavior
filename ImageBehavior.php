@@ -239,7 +239,7 @@ class ImageBehavior extends Behavior
                             if (isset($size['width']) && isset($size['height'])) {
                                 Imagick::open($filePath)
                                     ->thumb($size['width'], $size['height'])
-                                    ->watermark($this->watermark)
+                                    ->watermark($this->watermark, 'left', 'top', '100%', '100%')
                                     ->saveTo($filePath);
                             }
                         } else {
