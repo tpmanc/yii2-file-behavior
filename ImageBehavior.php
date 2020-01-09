@@ -29,6 +29,7 @@ class ImageBehavior extends Behavior
     public $orderField = false;
     public $isHashEnabled = true;
     public $watermark = null;
+    public $addWatermarkToOriginal = false;
 
     private $files;
 
@@ -239,6 +240,10 @@ class ImageBehavior extends Behavior
                             if (isset($size['width']) && isset($size['height'])) {
                                 Imagick::open($filePath)
                                     ->thumb($size['width'], $size['height'])
+                                    ->watermark($this->watermark, 'left', 'top', '100%', '100%')
+                                    ->saveTo($filePath);
+                            } elseif ($this->addWatermarkToOriginal) {
+                                Imagick::open($filePath)
                                     ->watermark($this->watermark, 'left', 'top', '100%', '100%')
                                     ->saveTo($filePath);
                             }
