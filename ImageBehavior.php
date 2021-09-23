@@ -114,7 +114,14 @@ class ImageBehavior extends Behavior
             }
         } else {
             foreach ($images as $image) {
-                $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path'] . $image['id'] . '.' . $image['extension']);
+                $info = pathinfo($image['path']);
+                if (isset($info['extension'])) {
+                    $result[$image['id']] = Yii::getAlias($this->webImageFolder . $image['path']);
+                } else {
+                    $result[$image['id']] = Yii::getAlias(
+                        $this->webImageFolder . $image['path'] . $image['id'] . '.' . $image['extension']
+                    );
+                }
             }
         }
 
@@ -158,6 +165,11 @@ class ImageBehavior extends Behavior
                 return Yii::getAlias($this->noImagePath);
             }
         } else {
+            $info = pathinfo($image['path']);
+            if (isset($info['extension'])) {
+                return Yii::getAlias($this->webImageFolder . $image['path']);
+            }
+
             return Yii::getAlias($this->webImageFolder . $image['path'] . $image['id'] . '.' . $image['extension']);
         }
     }
